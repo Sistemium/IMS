@@ -24,21 +24,30 @@ var all = {
   // Server IP
   ip: process.env.IP || '0.0.0.0',
 
-  // Should we populate the DB with sample data?
-  seedDB: false,
-
   // Secret for session, you will want to change this and make it an environment variable
   secrets: {
     session: 'ims-secret'
   },
 
-  // MongoDB connection options
-  mongo: {
-    options: {
-      db: {
-        safe: true
-      }
-    }
+  //image service config
+  ims: {
+    imageInfo: {
+
+    },
+
+    awsCredentials: {
+
+    },
+    uploadFolderPath: process.env.IMS_UPLOAD_FOLDER_PATH || '../../uploads/',
+
+    S3: {
+      bucket: process.env.IMS_S3_BUCKET || 'sisdev',
+      domain: process.env.IMS_S3_DOMAIN || 'domain'
+    },
+
+    infoFile: process.env.IMS_INFO_FILE || 'info.json',
+
+    format: ''
   }
 };
 

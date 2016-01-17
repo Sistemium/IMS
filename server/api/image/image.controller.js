@@ -13,6 +13,7 @@ import checkFormat from '../../services/checkFormat';
 import checksum from '../../services/generateChecksum';
 import checkIfExistAndValid from '../../services/checkIfExistAndValid';
 import uploadToS3 from '../../services/uploadToS3';
+import response from '../../services/response/response';
 const config = require('../../config/environment').ims;
 
 export function get(req, res) {
@@ -20,6 +21,7 @@ export function get(req, res) {
 }
 
 export function post(req, res) {
+
   let file = req.file = req.files.file;
   if  (file !== undefined) {
     winston.log('info', `Multipart file upload for ${file} started...`);
@@ -47,7 +49,7 @@ export function post(req, res) {
       yield checkIfExistAndValid(req);
 
       //files not already uploaded or not valid
-      yield uploadToS3(req);
+      //yield uploadToS3(req);
 
     }).then(function () {
       response();

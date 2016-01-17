@@ -1,12 +1,14 @@
 'use strict';
 
-var express = require('express');
-var controller = require('./image.controller');
-var multer = require('multer');
+const express = require('express');
+const controller = require('./image.controller');
+const multer = require('multer');
+const uploadPath = require('../../config/environment').ims.uploadFolderPath;
+const upload = multer({storage: uploadPath});
 
 var router = express.Router();
 
 router.get('/', controller.get);
-router.post('/', multer(), controller.post)
+router.post('/', upload.any(), controller.post);
 
 module.exports = router;

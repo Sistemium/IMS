@@ -32,11 +32,27 @@ var all = {
   //image service config
   ims: {
     imageInfo: {
-
+      smallImage: {
+        "width": 800,
+        "height": 800,
+        "suffix": "small"
+      },
+      mediumImage: {
+        "width": 2000,
+        "height": 2000,
+        "suffix": "medium"
+      },
+      thumbnail: {
+        "width": 200,
+        "height": 200,
+        "quality": 100,
+        "suffix": "thumbnail"
+      }
     },
 
     awsCredentials: {
-
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     },
     uploadFolderPath: process.env.IMS_UPLOAD_FOLDER_PATH || '../../uploads/',
 
@@ -47,7 +63,7 @@ var all = {
 
     infoFile: process.env.IMS_INFO_FILE || 'info.json',
 
-    format: ''
+    format: 'png'
   }
 };
 

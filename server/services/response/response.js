@@ -3,7 +3,7 @@
 const winston = require('winston');
 const AWS = require('aws-sdk');
 const _ = require('lodash');
-const config = require('../config/environment').ims;
+const config = require('../../config/environment/index').ims;
 
 export default function (options) {
   let params = {
@@ -35,7 +35,7 @@ export default function (options) {
             }
 
             let infoFile = JSON.parse(response.Body.toString());
-            let response = formResponse(response.Contents, infoFile);
+            response = formResponse(response.Contents, infoFile);
           })
         });
       } catch (err) {
@@ -71,8 +71,10 @@ function formResponse(contents, infoFile) {
           } else {
 
           }
-        })
-      })
+        });
+      });
+    } catch (err) {
+
     }
   }
 }

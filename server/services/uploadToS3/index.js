@@ -8,10 +8,12 @@ const config = require('../../config/environment').ims;
 
 export default function (req) {
   co(function* () {
-    _.each(config.imageInfo, function () {
+    yield Promise.resolve();
+    let cnfLength = config.imageInfo.length;
+    for (let i = 0; i < cnfLength; i++) {
       yield createImage(req);
       yield uploadImage(req);
-    });
+    }
 
     yield uploadInfoFile();
   });

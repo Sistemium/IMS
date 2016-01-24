@@ -18,6 +18,7 @@ describe('Image API:', function() {
             return done(err);
           }
           images = res.body;
+
           done();
         });
     });

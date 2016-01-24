@@ -22,6 +22,10 @@ export function get(req, res) {
 
 export function post(req, res) {
 
+  if (!req || !req.files) {
+    return res.status(400).end('File was not passed...');
+  }
+
   let file = req.file = req.files.file;
   if  (file !== undefined) {
     winston.log('info', `Multipart file upload for ${file} started...`);
@@ -53,6 +57,7 @@ export function post(req, res) {
 
     }).then(function () {
       response();
+      return res.status(200);
     }, function () {
 
     });

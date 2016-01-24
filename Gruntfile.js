@@ -717,10 +717,10 @@ module.exports = function (grunt) {
       'concurrent:server',
       'injector',
       'wiredep:client',
-      'postcss',
+      //'postcss',
       'express:dev',
       'wait',
-      'open',
+      //'open',
       'watch'
     ]);
   });

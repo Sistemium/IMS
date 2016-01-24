@@ -36,6 +36,7 @@ export default function (options) {
 
             let infoFile = JSON.parse(response.Body.toString());
             response = formResponse(response.Contents, infoFile);
+            resolve(response);
           })
         });
       } catch (err) {

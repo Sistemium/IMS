@@ -13,9 +13,11 @@ import checkFormat from '../../services/checkFormat';
 import checksum from '../../services/generateChecksum';
 import checkIfExistAndValid from '../../services/checkIfExistAndValid';
 import uploadToS3 from '../../services/uploadToS3';
+import cleanup from '../../services/cleanup';
 import response from '../../services/response/response';
 const config = require('../../config/environment').ims;
 const debug = require('debug')('ims:image.controller');
+const path = require('path');
 
 export function get(req, res) {
   res.json([]);
@@ -28,11 +30,11 @@ export function post(req, res) {
   }
 
   let file = req.file;
-  if  (file !== undefined) {
+  if (file !== undefined) {
     winston.log('info', `Multipart file upload for ${file.path} started...`);
-    let folder = config.uploadFolderPath + uuid.v4();
+    let folder = res.locals.folder = path.normalize(path.join(__dirname, config.uploadFolderPath + uuid.v4()));
     mkdirp(folder, () => {
-      let ws = fs.createWriteStream(`${folder}/${file.name}`);
+      let ws = fs.createWriteStream(`${folder}/${file.filename}`);
       let rs = fs.createReadStream(file.path);
       rs.pipe(ws);
       ws.on('finish', function () {
@@ -41,7 +43,7 @@ export function post(req, res) {
     });
   }
 
-  function execute() {
+  function execute(folder) {
     co(function* () {
 
       //check file format
@@ -53,25 +55,31 @@ export function post(req, res) {
       debug('checksum started');
       let chsm = yield checksum(req.file.path);
       debug('checksum finished');
-      req.file.checksum = chsm;
 
       //check if already exist on amazon and if it correct
       debug('checkIfExistAndValid started');
-      yield checkIfExistAndValid(req);
+      const folder = req.body.folder || req.query.folder;
+      const prefix = `${folder}/${chsm}/`;
+      let existAndValid = yield checkIfExistAndValid(prefix, chsm);
       debug('checkIfExistAndValid finished');
 
       //files not already uploaded or not valid
-      debug('uploadToS3 started');
-      yield uploadToS3(req);
-      debug('uploadToS3 finished');
+      if (!existAndValid) {
+        debug('uploadToS3 started');
+        yield uploadToS3(req.file.path, prefix);
+        debug('uploadToS3 finished');
+      }
 
-    }).then(function () {
-      response();
-      return res.status(200);
-    }, function (err) {
-      winston.log('error', `Something went wrong, error message ${err}`);
-    }).catch (function (err) {
-      winston.log('error', `Error occurred ${err}`);
+      cleanup(res.locals.folder);
+
+      debug('response started');
+      let resData = yield response(prefix);
+      debug('response finished');
+
+      return res.json(resData);
+
+    }).catch(function (err) {
+      winston.log('error', `Error occurred ${err.stack}`);
     });
   }
 }

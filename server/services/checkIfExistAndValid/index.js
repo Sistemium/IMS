@@ -6,23 +6,24 @@ const co = require('co');
 const checkValidity = require('./checkDataValidity');
 const checkStructure = require('./checkJsonStructure');
 const config = require('../../config/environment').ims;
+const debug = require('debug')('ims:checkIfExistAndValid');
 
 /**
  *
- * @param param
+ * @param prefix String
+ * @param checksum String
+ * @returns {Promise}
  */
-export default function (paramObj) {
+export default function (prefix, checksum) {
   let S3 = new AWS.S3(config.awsCredentials);
   // maybe make default folder?
-  const folder = paramObj.body.folder || paramObj.query.folder;
-  const checksum = paramObj.file.checksum;
-  const prefix = `${folder}/${checksum}/`;
+
   const params = {
     Bucket: config.S3.bucket,
     Prefix: prefix
   };
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     S3.listObjects(params, function (err, bucket) {
       // check if files correct resend if not
       if (err) {
@@ -33,22 +34,28 @@ export default function (paramObj) {
       if (bucket && bucket.Contents && bucket.Contents.length > 0) {
         winston.log('info', `File with this checksum ${checksum} already uploaded...`);
         co(function* () {
+          debug('checkStructure started');
           yield checkStructure(prefix);
-        }).then(function () {
+          debug('checkStructure finished');
+
           try {
-            checkValidity(bucket.Contents)
+            debug('checkValidity started');
+            checkValidity(bucket.Contents);
+            debug('checkValidity finished');
           } catch (err) {
             winston.log('error', `Error message: ${err}. Invalid data in the aws, retrying to resend...`);
-            resolve();
+            resolve(true);
           } finally {
-            reject();
+            resolve(false);
           }
-        }, function (err) {
-
-        });
+        }).catch(function (err) {
+          winston.log('error', `Error occurred while checking validity, error message ${err}`);
+          winston.log('info', `Trying to resend`);
+          resolve(true);
+        })
       } else {
         winston.log('info', `No files with checksum ${checksum} uploaded...`);
-        resolve();
+        resolve(true);
       }
     });
   });

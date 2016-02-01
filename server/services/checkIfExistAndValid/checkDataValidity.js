@@ -20,11 +20,12 @@ export default function (contents) {
         counter++;
       }
     });
-    let keysLength = Object.keys(imageInfo).length;
-    if (counter !== keysLength) {
-      winston.log('error', `Uploaded file is incorrect`);
-      throw new Error(`Count of configured images, does not match count of images on s3.
-      Expected to have ${keysLength} but got ${counter}`);
-    }
   });
+
+  let keysLength = Object.keys(imageInfo).length;
+  if (counter !== keysLength) {
+    winston.log('error', `Uploaded file is incorrect`);
+    throw new Error(`Count of configured images, does not match count of images on s3.
+      Expected to have ${keysLength} but got ${counter}`);
+  }
 }

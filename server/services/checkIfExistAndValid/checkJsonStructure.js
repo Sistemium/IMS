@@ -9,7 +9,7 @@ const S3 = new AWS.S3(config.awsCredentials);
 export default function (prefix) {
   const infoFileKey = prefix + config.infoFile;
   const params = {
-    Bucket: config.S3.Bucket,
+    Bucket: config.S3.bucket,
     Key: infoFileKey
   };
 

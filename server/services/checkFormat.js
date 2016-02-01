@@ -3,6 +3,7 @@
 const imsConfig = require('../config/environment').ims;
 const gm = require('gm').subClass({imageMagick: true});
 const winston = require('winston');
+const debug = require('debug')('ims:*');
 
 export default function (file) {
   return new Promise(function (resolve, reject) {
@@ -16,13 +17,14 @@ export default function (file) {
 
         format = format.toLowerCase();
 
-        if (!imsConfig.contentType && !imsConfig.contentType[format]) {
+        //debug('checkFormat', imsConfig);
+        if (!imsConfig.supportedFormats && !imsConfig.supportedFormats[format]) {
           reject('Format not supported...');
           winston.log('warn', `There no option in configuration file for ${imsConfig.contentType}`);
         }
 
-        if (imsConfig.contentType[format]) {
-          file.contentType = imsConfig.contentType[format];
+        if (imsConfig.supportedFormats[format]) {
+          file.contentType = imsConfig.supportedFormats[format];
           winston.log('info', `Supported format, contentType set to: ${file.contentType}`);
           resolve();
         } else {

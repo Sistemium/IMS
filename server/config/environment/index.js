@@ -56,7 +56,8 @@ var all = {
     },
     uploadFolderPath: process.env.IMS_UPLOAD_FOLDER_PATH || '../../uploads/',
     supportedFormats: {
-      'jpeg': 'image/jpg'
+      'jpeg': 'image/jpg',
+      'png': 'image/png'
     },
 
     S3: {

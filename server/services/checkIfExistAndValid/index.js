@@ -13,7 +13,8 @@ const config = require('../../config/environment').ims;
  */
 export default function (paramObj) {
   let S3 = new AWS.S3(config.awsCredentials);
-  const folder = paramObj.body.folder || req.query.folder;
+  // maybe make default folder?
+  const folder = paramObj.body.folder || paramObj.query.folder;
   const checksum = paramObj.file.checksum;
   const prefix = `${folder}/${checksum}/`;
   const params = {

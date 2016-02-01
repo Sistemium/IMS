@@ -55,6 +55,9 @@ var all = {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     },
     uploadFolderPath: process.env.IMS_UPLOAD_FOLDER_PATH || '../../uploads/',
+    supportedFormats: {
+      'jpeg': 'image/jpg'
+    },
 
     S3: {
       bucket: process.env.IMS_S3_BUCKET || 'sisdev',

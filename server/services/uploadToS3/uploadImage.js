@@ -8,18 +8,18 @@ const winston =require('winston');
 
 export default function (options) {
   return new Promise(function (resolve, reject) {
-    let imageStream = fs.createReadStream(options.image.path);
-    let fileSize = fileSize(options.image.path);
+    let imageStream = fs.createReadStream(options.file.path);
+    let file = fileSize(options.file.path);
 
     const S3 = new AWS.S3(config.awsCredentials);
     const params = {
-      Bucket: config.S3.Bucket,
-      Key: options.path,
+      Bucket: config.S3.bucket,
+      Key: options.key,
       Body: imageStream,
-      ContentType: options.image.contentType,
+      ContentType: options.file.contentType,
       Metadata: {
-        width: fileSize.width.toString(),
-        height: fileSize.height.toString()
+        width: file.width.toString(),
+        height: file.height.toString()
       }
     };
 
@@ -30,11 +30,11 @@ export default function (options) {
       }
 
       resolve({
-        name: options.name,
-        bucketKey: options.path,
-        width: fileSize.width,
-        height: fileSize.height
-      })
+        name: options.imageInfoKey,
+        bucketKey: options.key,
+        height: file.height,
+        width: file.width
+      });
     });
   });
 }

@@ -8,7 +8,7 @@ export default function (options) {
   return new Promise(function (resolve, reject) {
     let S3 = new AWS.S3(config.awsCredentials);
     const params = {
-      Bucket: config.S3.Bucket,
+      Bucket: config.S3.bucket,
       Key: options.key,
       Body: options.body,
       ContentType: 'application/json'
@@ -17,7 +17,7 @@ export default function (options) {
     S3.putObject(params, function (err, response) {
       if (err) {
         winston.log('error', `Error during info file upload. Error message: ${err}`);
-        return reject();
+        return reject(err);
       }
 
       winston.log('info', `Successfully uploaded info file to the AWS...`);

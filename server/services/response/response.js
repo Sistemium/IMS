@@ -5,10 +5,10 @@ const AWS = require('aws-sdk');
 const _ = require('lodash');
 const config = require('../../config/environment/index').ims;
 
-export default function (options) {
+export default function (prefix) {
   let params = {
-    Bucket: config.S3.Bucket,
-    Prefix: options.prefix
+    Bucket: config.S3.bucket,
+    Prefix: prefix
   };
 
   return new Promise(function (resolve, reject) {
@@ -25,28 +25,40 @@ export default function (options) {
           reject('Contents are empty...');
         }
 
-        response.Contents.forEach((i) => {
-          params.Prefix = options.prefix + config.infoFile;
+        let foundConfig = false;
+        response.Contents.forEach((item) => {
+          let fileName = item.Key.split('/').splice(-1)[0];
 
-          S3.getObject(params, function (err, response) {
-            if (err) {
-              winston.log('error', `Error occurred while getting the object from ${params.Prefix}. Error message: ${err}`);
-              return reject(err);
-            }
+          if(fileName === config.infoFile) {
+            foundConfig = true;
+            params.Key = prefix + config.infoFile;
+            delete params.Prefix;
 
-            let infoFile = JSON.parse(response.Body.toString());
-            response = formResponse(response.Contents, infoFile);
-            resolve(response);
-          })
+            S3.getObject(params, function (err, innerResponse) {
+              if (err) {
+                winston.log('error', `Error occurred while getting the object from ${params.Prefix}. Error message: ${err}`);
+                return reject(err);
+              }
+
+              let infoFile = JSON.parse(innerResponse.Body.toString());
+              innerResponse = formResponse(response.Contents, infoFile, reject);
+              resolve(innerResponse);
+            });
+          }
         });
+
+        if (!foundConfig) {
+          reject('Error occurred in response.js file. InfoFile not found...');
+        }
+
       } catch (err) {
-        reject(err);
+        reject(`Error occurred in response.js file... Error message: ${err}`);
       }
     });
   });
 }
 
-function formResponse(contents, infoFile) {
+function formResponse(contents, infoFile, reject) {
   if (contents.length > 0) {
     let arr = contents[0].Key.split('/');
     let folder = arr[0];
@@ -59,23 +71,30 @@ function formResponse(contents, infoFile) {
 
     try {
       _.each(config.imageInfo, function (value, key) {
+        let existInConfig = false;
         contents.forEach(function (i) {
           let filename = i.Key.split('/').splice(-1)[0].split('.')[0];
           winston.log('debug', `filename name is: ${filename}`);
           winston.log('debug', `key name is: ${key}`);
           if (filename === key) {
+            existInConfig = true;
             let search = _.findWhere(infoFile, {name: key});
             resObj.pictures.push({
               name: key,
-              src: config.S3.Domain
-            })
-          } else {
-
+              src: config.S3.Domain,
+              height: search.height,
+              width: search.width
+            });
           }
         });
+        if (!existInConfig) {
+          reject(`Error occurred in response.js file. No such key "${key}" in config file...`);
+        }
       });
     } catch (err) {
-
+      reject(`Error occurred in response.js file... Error message ${err}`);
     }
+
+    return resObj;
   }
 }

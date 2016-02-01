@@ -3,18 +3,20 @@
 const gm = require('gm').subClass({imageMagick: true});
 const config = require('../../config/environment').ims;
 const winston = require('winston');
+const debug = require('debug')('ims:createImage');
 
-export default function (options) {
+export default function (filePath, fileOptions) {
+
   return new Promise(function (resolve, reject) {
-    gm(options.image.path)
+    gm(filePath)
       .setFormat(config.format)
-      .resize(options.width || 100, options.height || 100, '>')
-      .write(options.path, function (err) {
+      .resize(fileOptions.width || 100, fileOptions.height || 100, '>')
+      .write(fileOptions.path, function (err) {
         if (err) {
           winston.log('error', `Error occurred: ${err}`);
           reject(err);
         }
-        winston.log('info', `File sized to ${option.width}x${options.height} at the path: ${options.path}`);
+        winston.log('info', `File sized to ${fileOptions.width}x${fileOptions.height} at the path: ${fileOptions.path}`);
         resolve();
       });
   });

@@ -13,6 +13,7 @@ export default function (path, prefix) {
     let imageInfoKeys = Object.keys(config.imageInfo);
     let cnfLength = imageInfoKeys.length;
     let infoFileData = [];
+    console.log(imageInfoKeys);
 
     for (let i = 0; i < cnfLength; i++) {
 
@@ -36,6 +37,19 @@ export default function (path, prefix) {
       infoFileData.push(uploadedFileInfo);
       debug('uploadImage finished');
     }
+
+    debug('upload original image started');
+    let ouiParams = {
+      file: {
+        path: path,
+        contentType: config.supportedFormats[config.format]
+      },
+      key: `${prefix}original`,
+      imageInfoKey: 'original'
+    };
+    let ufInfo = yield uploadImage(ouiParams);
+    infoFileData.push(ufInfo);
+    debug('upload original image finished');
 
     debug('uploadInfoFile started');
     let uifOptions = {

@@ -23,6 +23,7 @@ export default function (prefix) {
       } else {
         let parsed = JSON.parse(response.Body.toString());
         _.each(config.imageInfo, function (n, key) {
+
           let res = _.where(parsed, {name: key});
           if (res.length != 1) {
             winston.log('error', `Incorrect ${config.infoFile} file...`);

@@ -6,7 +6,6 @@
 'use strict';
 import co from 'co';
 import winston from 'winston';
-import mkdirp from 'mkdirp';
 import uuid from 'node-uuid';
 import fs from 'fs';
 import checkFormat from '../../services/checkFormat';
@@ -32,28 +31,20 @@ export function post(req, res) {
   let file = req.file;
   if (file !== undefined) {
     winston.log('info', `Multipart file upload for ${file.path} started...`);
-    let folder = res.locals.folder = path.normalize(path.join(__dirname, config.uploadFolderPath + uuid.v4()));
-    mkdirp(folder, () => {
-      let ws = fs.createWriteStream(`${folder}/${file.filename}`);
-      let rs = fs.createReadStream(file.path);
-      rs.pipe(ws);
-      ws.on('finish', function () {
-        execute();
-      });
-    });
+    execute();
   }
 
-  function execute(folder) {
+  function execute() {
     co(function* () {
 
       //check file format
       debug('checkFormat started');
-      yield checkFormat(req.file);
+      yield checkFormat(file);
       debug('checkFormat finished');
 
       //find checksum of the file
       debug('checksum started');
-      let chsm = yield checksum(req.file.path);
+      let chsm = yield checksum(file.path);
       debug('checksum finished');
 
       //check if already exist on amazon and if it correct
@@ -66,7 +57,7 @@ export function post(req, res) {
       //files not already uploaded or not valid
       if (!existAndValid) {
         debug('uploadToS3 started');
-        yield uploadToS3(req.file.path, prefix);
+        yield uploadToS3(file.path, prefix);
         debug('uploadToS3 finished');
       }
 

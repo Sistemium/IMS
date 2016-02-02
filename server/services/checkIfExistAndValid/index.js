@@ -44,18 +44,18 @@ export default function (prefix, checksum) {
             debug('checkValidity finished');
           } catch (err) {
             winston.log('error', `Error message: ${err}. Invalid data in the aws, retrying to resend...`);
-            resolve(true);
-          } finally {
             resolve(false);
+          } finally {
+            resolve(true);
           }
         }).catch(function (err) {
           winston.log('error', `Error occurred while checking validity, error message ${err}`);
           winston.log('info', `Trying to resend`);
-          resolve(true);
+          resolve(false);
         })
       } else {
         winston.log('info', `No files with checksum ${checksum} uploaded...`);
-        resolve(true);
+        resolve(false);
       }
     });
   });

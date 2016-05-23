@@ -9,22 +9,21 @@ const uuid = require('node-uuid');
 const mkdirp = require('mkdirp');
 
 const destPath = path.normalize(path.join(__dirname, uploadPath, uuid.v4()));
-function setUploadPath() {
-  return function (req, res, next) {
-    mkdirp(destPath, (err) => {
-      if (err) next(err);
+function setUploadPath(req, res, next) {
+  mkdirp(destPath, (err) => {
+    if (err) next(err);
 
-      res.locals.folder = destPath;
-      next();
-    });
-  }
+    res.locals.folder = destPath;
+    next();
+  });
 }
+
 
 const upload = multer({dest: destPath});
 
 var router = express.Router();
 
 router.get('/', controller.get);
-router.post('/', setUploadPath(), upload.single('file'), controller.post);
+router.post('/', setUploadPath, upload.single('file'), controller.post);
 
 module.exports = router;

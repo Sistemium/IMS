@@ -11,6 +11,7 @@ export default function (filePath, fileOptions) {
     gm(filePath)
       .setFormat(config.format)
       .resize(fileOptions.width || 100, fileOptions.height || 100, '>')
+      .autoOrient()
       .write(fileOptions.path, function (err) {
         if (err) {
           winston.log('error', `Error occurred: ${err}`);
